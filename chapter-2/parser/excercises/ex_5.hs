@@ -25,7 +25,7 @@ data LispVal = Atom String
              | List [LispVal]  
              | DottedList [LispVal] LispVal
              | Number Integer
-             | Character String
+             | Character Char
              | String String
              | Bool Bool
 
@@ -83,8 +83,14 @@ parseHexNum = do try $ string "#x"
 
 parseCharacter :: Parser LispVal
 parseCharacter = do try $ string "#\\"
-                    c <- many1 (noneOf " ")
+                    c <- parseCharName <|> anyChar
                     return $ Character c
+
+parseCharName :: Parser Char
+parseCharName = do x <- try (string "space" <|> string "newline")
+                   case x of
+                     "space" -> do return ' '
+                     "newline" -> do return '\n'
 
 parseExpr :: Parser LispVal
 parseExpr = parseAtom
