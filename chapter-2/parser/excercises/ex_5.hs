@@ -31,14 +31,19 @@ data LispVal = Atom String
 
 parseString :: Parser LispVal
 parseString = do char '"'
-                 x <- many (escapedSymbol <|> noneOf "\"")
+                 x <- many $ many1 (noneOf "\"\\") <|> escapedChars
                  char '"'
-                 return $ String x
+                 return $ String (concat x)
 
-escapedSymbol :: Parser Char
-escapedSymbol = do char '\\'
-                   escapedChar <- char '\"'
-                   return escapedChar
+escapedChars :: Parser String
+escapedChars = do char '\\'
+                  c <- oneOf "\"\\nrt"
+                  return $ case c of
+                     '\\' -> "\\"
+                     '\"' -> "\""
+                     'n' -> "\n"
+                     'r' -> "\r"
+                     't' -> "\t"
 
 parseAtom :: Parser LispVal
 parseAtom = do first <- letter <|> symbol

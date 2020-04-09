@@ -27,14 +27,14 @@ data LispVal = Atom String
 
 parseString :: Parser LispVal
 parseString = do char '"'
-                 x <- many $ many1 (noneOf "\"\\") <|> escapedSymbol
+                 x <- many $ many1 (noneOf "\"\\") <|> escapedChars
                  char '"'
                  return $ String (concat x)
 
-escapedSymbol :: Parser String
-escapedSymbol = do char '\\'
-                   c <- oneOf "\"\\nrt"
-                   return $ case c of
+escapedChars :: Parser String
+escapedChars = do char '\\'
+                  c <- oneOf "\"\\nrt"
+                  return $ case c of
                      '\\' -> "\\"
                      '\"' -> "\""
                      'n' -> "\n"
